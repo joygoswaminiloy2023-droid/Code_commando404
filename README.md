@@ -12,6 +12,10 @@ open source project management, Next.js 14 App Router MongoDB Mongoose NextAuth 
 
 <br/>
 
+<img src="https://user-images.githubusercontent.com/74038190/212749443-0810e511-4f46-4492-96aa-3c110d7bc41a.gif" width="400" alt="Coding fun gif" />
+
+<br/>
+
 [![Made with Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com)
 [![Socket.io](https://img.shields.io/badge/Realtime-Socket.io-black?style=for-the-badge&logo=socket.io)](https://socket.io)
@@ -116,8 +120,9 @@ of the Socket.io server — a small VPS, Railway, Render, or a Docker container 
 ## 🤝 Contributing & Collaboration
 
 <div align="center">
-
+<img src="https://user-images.githubusercontent.com/74038190/212284119-fbfd994d-8c2a-4a07-a75f-84e513833c1c.gif" width="400" alt="Collaboration gif" />
 </div>
+
 <div align="center">
 <img src="https://readme-typing-svg.demolab.com/?font=Fira+Code&weight=500&size=18&pause=1200&color=00C2A8&center=true&vCenter=true&width=550&lines=Built+together%2C+better+together+%F0%9F%A4%9D;Open+an+issue+%E2%80%94+we%27d+love+your+ideas!;Fork+it.+Improve+it.+Send+a+PR." alt="Collaboration typing animation" />
 
