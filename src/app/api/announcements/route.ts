@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { connectDB, emitBroadcast } from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import Announcement from "@/models/Announcement";
 import User from "@/models/User";
 import Notification from "@/models/Notification";
+import { sendPushToUsers } from "@/lib/push";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -44,6 +45,10 @@ export async function POST(req: Request) {
     }))
   );
 
-  emitBroadcast("announcement:new", populated);
+  sendPushToUsers(
+    members.map((m: any) => m._id.toString()),
+    { title: "Announcement", body: message, url: "/dashboard" }
+  );
+
   return NextResponse.json(populated, { status: 201 });
 }

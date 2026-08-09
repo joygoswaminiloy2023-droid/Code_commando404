@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import NotificationBell from "@/components/NotificationBell";
+import PushEnableButton from "@/components/PushEnableButton";
 import { Menu } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -52,6 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {user.name?.[0]?.toUpperCase()}
               </div>
             )}
+            <PushEnableButton />
             <NotificationBell userId={user.id} />
           </div>
         </header>

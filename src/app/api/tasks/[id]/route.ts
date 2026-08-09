@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/db";
 import Task from "@/models/Task";
 import Notification from "@/models/Notification";
 import Activity from "@/models/Activity";
+import { sendPushToUsers } from "@/lib/push";
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -33,6 +34,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     task.completedBy = user.id;
     await task.save();
 
+    const projectId = task.project.toString();
+    const assignedById = task.assignedBy.toString();
+
     const populated = await task.populate([
       { path: "assignees", select: "name avatarColor avatarUrl title" },
       { path: "assignedBy", select: "name avatarColor avatarUrl" },
@@ -42,13 +46,19 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     const message = `${user.name} completed "${task.title}".`;
     await Notification.create({
-      recipient: task.assignedBy,
+      recipient: assignedById,
       message,
       type: "completed",
       taskId: task._id
     });
 
     await Activity.create({ kind: "completed", taskTitle: task.title, assigneeName: user.name });
+
+    sendPushToUsers([assignedById], {
+      title: "Task completed",
+      body: message,
+      url: "/dashboard/admin/projects/" + projectId
+    });
 
     return NextResponse.json(populated);
   }
@@ -68,6 +78,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
   await task.save();
 
+  const assigneeIds = task.assignees.map((a: any) => a.toString());
+
   const populated = await task.populate([
     { path: "assignees", select: "name avatarColor avatarUrl title" },
     { path: "assignedBy", select: "name avatarColor avatarUrl" },
@@ -76,11 +88,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   ]);
 
   if (body.assignees) {
+    const message = `Task "${task.title}" was updated by an admin.`;
     await Activity.create({
       kind: "assigned",
       taskTitle: task.title,
       assigneeName: task.groupName || populated.assignees.map((a: any) => a.name).join(", ")
     });
+    sendPushToUsers(assigneeIds, { title: "Task updated", body: message, url: "/dashboard" });
   }
 
   return NextResponse.json(populated);

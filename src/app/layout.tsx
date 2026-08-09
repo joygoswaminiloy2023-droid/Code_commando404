@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
@@ -9,7 +9,25 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", weigh
 
 export const metadata: Metadata = {
   title: "Code Commando 404",
-  description: "Multi-project team workspace — assign, track and ship work together, in real time."
+  description: "Multi-project team workspace — assign, track and ship work together, in real time.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Code Commando 404"
+  },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/icon-192.png"
+  }
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0B0F14",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
