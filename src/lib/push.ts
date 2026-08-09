@@ -28,6 +28,12 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload) {
 
   try {
     await connectDB();
+    console.log(
+      "PushSubscription diagnostic:",
+      "type=", typeof PushSubscription,
+      "hasFind=", typeof (PushSubscription as any)?.find,
+      "modelName=", (PushSubscription as any)?.modelName
+    );
     const subs = await PushSubscription.find({ user: { $in: userIds } }).lean();
     const body = JSON.stringify(payload);
 

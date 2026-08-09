@@ -44,15 +44,22 @@ export default function PushEnableButton() {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
-      await fetch("/api/push/subscribe", {
+      const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subscription: sub })
       });
+      if (!res.ok) {
+        // The subscribe API call failed — undo the browser-side subscription
+        // too, so the UI never claims "on" when the server never saved it.
+        await sub.unsubscribe();
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Server couldn't save the subscription.");
+      }
       setSubscribed(true);
       toast.success("Push notifications are on for this device.");
-    } catch {
-      toast.error("Couldn't turn on notifications. Try again.");
+    } catch (err: any) {
+      toast.error(err?.message || "Couldn't turn on notifications. Try again.");
     } finally {
       setBusy(false);
     }

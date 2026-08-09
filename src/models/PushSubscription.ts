@@ -1,4 +1,4 @@
-import { Schema, models, model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const PushSubscriptionSchema = new Schema(
   {
@@ -12,4 +12,7 @@ const PushSubscriptionSchema = new Schema(
   { timestamps: true }
 );
 
-export default models.PushSubscription || model("PushSubscription", PushSubscriptionSchema);
+const PushSubscription =
+  mongoose.models.PushSubscription || mongoose.model("PushSubscription", PushSubscriptionSchema);
+
+export default PushSubscription;
