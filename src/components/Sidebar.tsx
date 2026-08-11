@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutGrid, Users, User, FolderKanban, LogOut, Terminal, X } from "lucide-react";
+import {
+  LayoutGrid, Users, User, FolderKanban, LogOut, Terminal, X,
+  MessageCircle, StickyNote, Sparkles, Video
+} from "lucide-react";
 import clsx from "clsx";
 
 export default function Sidebar({
@@ -21,14 +24,23 @@ export default function Sidebar({
     { href: "/dashboard/admin", label: "Overview", icon: LayoutGrid },
     { href: "/dashboard/admin/projects", label: "Projects", icon: FolderKanban },
     { href: "/dashboard/admin/users", label: "Team", icon: Users },
+    { href: "/dashboard/admin/messages", label: "Messages", icon: MessageCircle },
+    { href: "/dashboard/showcase", label: "Showcase", icon: Sparkles },
+    { href: "/dashboard/meeting-room", label: "Meeting room", icon: Video },
+    { href: "/dashboard/notes", label: "Notes", icon: StickyNote },
     { href: "/dashboard/profile", label: "Profile", icon: User }
   ];
   const memberLinks = [
     { href: "/dashboard/user", label: "My projects", icon: FolderKanban },
+    { href: "/dashboard/messages", label: "Message admin", icon: MessageCircle },
+    { href: "/dashboard/showcase", label: "Showcase", icon: Sparkles },
+    { href: "/dashboard/meeting-room", label: "Meeting room", icon: Video },
+    { href: "/dashboard/notes", label: "Notes", icon: StickyNote },
     { href: "/dashboard/profile", label: "Profile", icon: User }
   ];
 
   const links = role === "admin" ? adminLinks : memberLinks;
+  const topLevel = ["/dashboard/admin", "/dashboard/user"];
 
   const content = (
     <>
@@ -47,9 +59,9 @@ export default function Sidebar({
         </button>
       </div>
 
-      <nav className="flex-1 space-y-1">
+      <nav className="flex-1 space-y-1 overflow-y-auto">
         {links.map((link) => {
-          const active = pathname === link.href || (link.href !== "/dashboard/admin" && link.href !== "/dashboard/user" && pathname.startsWith(link.href));
+          const active = pathname === link.href || (!topLevel.includes(link.href) && pathname.startsWith(link.href));
           const Icon = link.icon;
           return (
             <Link

@@ -26,7 +26,10 @@ const TaskSchema = new Schema(
     attachments: [AttachmentSchema],
     figmaLink: { type: String, default: "" },
     completedAt: { type: Date, default: null },
-    completedBy: { type: Schema.Types.ObjectId, ref: "User", default: null }
+    completedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    // Set once a deadline-approaching push/notification has gone out, so the
+    // daily reminder cron never nags the same task twice.
+    reminderSent: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

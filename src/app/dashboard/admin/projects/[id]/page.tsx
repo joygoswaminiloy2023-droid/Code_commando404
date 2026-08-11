@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, Users, FolderOpen, ListChecks, Settings, Trash2, UserX, UserCheck, ArrowLeft } from "lucide-react";
+import { Plus, Users, FolderOpen, ListChecks, Settings, Trash2, UserX, UserCheck, ArrowLeft, Trophy } from "lucide-react";
 import clsx from "clsx";
 import toast from "react-hot-toast";
 import TaskCard from "@/components/TaskCard";
@@ -12,10 +12,12 @@ import ResourceModal from "@/components/ResourceModal";
 import ResourceList from "@/components/ResourceList";
 import ProjectFormModal from "@/components/ProjectFormModal";
 import MemberPicker from "@/components/MemberPicker";
+import ProjectLeaderboard from "@/components/ProjectLeaderboard";
 
 const TABS = [
   { id: "tasks", label: "Tasks", icon: ListChecks },
   { id: "team", label: "Team & groups", icon: Users },
+  { id: "leaderboard", label: "Leaderboard", icon: Trophy },
   { id: "files", label: "Files & links", icon: FolderOpen },
   { id: "settings", label: "Settings", icon: Settings }
 ];
@@ -227,6 +229,8 @@ export default function AdminProjectDetail() {
           </div>
         </div>
       )}
+
+      {tab === "leaderboard" && <ProjectLeaderboard projectId={id} />}
 
       {tab === "files" && (
         <div className="bg-panel border border-line rounded-xl2 p-5 max-w-2xl">

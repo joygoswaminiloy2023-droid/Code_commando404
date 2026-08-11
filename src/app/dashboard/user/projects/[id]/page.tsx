@@ -3,15 +3,17 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, Users, FolderOpen, ListChecks } from "lucide-react";
+import { ArrowLeft, Users, FolderOpen, ListChecks, Trophy } from "lucide-react";
 import clsx from "clsx";
 import TaskCard from "@/components/TaskCard";
 import ResourceList from "@/components/ResourceList";
+import ProjectLeaderboard from "@/components/ProjectLeaderboard";
 
 const POLL_MS = 20000;
 
 const TABS = [
   { id: "tasks", label: "My tasks", icon: ListChecks },
+  { id: "leaderboard", label: "Leaderboard", icon: Trophy },
   { id: "files", label: "Files & links", icon: FolderOpen },
   { id: "team", label: "Team", icon: Users }
 ];
@@ -80,6 +82,15 @@ export default function MemberProjectDetail() {
 
       {tab === "tasks" && (
         <div>
+          <div className="bg-panel border border-line rounded-xl2 p-4 mb-6 flex items-center justify-between max-w-md">
+            <div>
+              <div className="text-sm text-paper font-medium">Your progress here</div>
+              <div className="text-xs text-mute">{completed.length} of {tasks.length} tasks done</div>
+            </div>
+            <div className="w-12 h-12 rounded-full border-2 border-signal/30 flex items-center justify-center font-display text-signal text-sm">
+              {tasks.length > 0 ? Math.round((completed.length / tasks.length) * 100) : 0}%
+            </div>
+          </div>
           <h3 className="font-display text-base text-paper mb-3">Open ({pending.length})</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {pending.map((t) => (
@@ -96,6 +107,8 @@ export default function MemberProjectDetail() {
           </div>
         </div>
       )}
+
+      {tab === "leaderboard" && <ProjectLeaderboard projectId={id} />}
 
       {tab === "files" && (
         <div className="bg-panel border border-line rounded-xl2 p-5 max-w-2xl">
