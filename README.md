@@ -88,6 +88,14 @@
 
 ## 😩 Designer vs Developer, a Timeless Tale
 
+<div align="center">
+<img src="./assets/developer_vs_designer_fighting.gif" width="700" alt="Developer vs Designer fighting it out"/>
+<br/>
+<sub><i>Every sprint planning meeting, summarized in one image.</i></sub>
+</div>
+
+<br/>
+
 <table align="center">
 <tr>
 <td align="center" width="50%">
