@@ -1,74 +1,184 @@
-# Code Commando 404
+<div align="center">
 
-A multi-project internal workspace: an admin creates projects, builds a team
-and groups inside each one, assigns tasks (to individuals or a whole group at
-once) with deadlines and files, and everyone sees live status. Admins get
-on-time/late analytics and full control over the team; members only see the
-projects they've been added to.
+# ⚡ Code Commando 404
 
-## Stack
-- Next.js 14 (App Router) + TypeScript
-- MongoDB + Mongoose
-- NextAuth (credentials) for admin/member auth
-- Polling-based live updates (notifications, activity feed, announcements) —
-  built to run entirely on Vercel's serverless functions, no persistent
-  server required
-- Tailwind CSS + Framer Motion + Recharts + react-hot-toast
+### Task management, meetings & team ops — built for teams who ship.
 
-## Deploying on Vercel
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=E8342B&center=true&vCenter=true&width=600&lines=Assign+tasks.+Ship+fast.+Repeat.;Deadlines+that+actually+notify+you.;Meetings+that+don't+get+forgotten.;Built+with+love+%2B+way+too+much+coffee." alt="Typing SVG" />
 
-1. Push this project to a GitHub repo and import it in Vercel.
-2. In **Project Settings → Environment Variables**, add:
-   - `MONGODB_URI` — a MongoDB Atlas connection string (Atlas has a free
-     tier; a local `127.0.0.1` URI won't work since Vercel runs off-machine)
-   - `NEXTAUTH_SECRET` — any long random string, e.g. `openssl rand -base64 32`
-   - `NEXTAUTH_URL` — your deployed URL, e.g. `https://your-app.vercel.app`
-3. Deploy. Build and start commands are the Vercel defaults (`next build` /
-   `next start`) — no custom server needed.
-4. Visit `/setup` once to create the first admin account — that route only
-   ever works for the very first user. Every account after that is added
-   from inside the dashboard (**Team → Add member**).
+[![Live Demo](https://img.shields.io/badge/🚀_LIVE_DEMO-View_App-E8342B?style=for-the-badge)](https://codecommando404.vercel.app)
+[![Made by Binary Eclipse](https://img.shields.io/badge/💡_Idea_by-Binary--Eclipse-000000?style=for-the-badge&logo=github)](https://github.com/Binary-Eclipse)
 
-## Local development
+</div>
+
+---
+
+## 🌌 The Origin Story
+
+> This whole idea sparked from my brother **[Binary-Eclipse](https://github.com/Binary-Eclipse)** 🖤
+> One random conversation, one "we should build this," and a few hundred `MissingSchemaError`s later — **Code Commando 404** was born.
+>
+> Shoutout to the brother who plants the idea and disappears while I fight the deployment logs. 😤❤️
+
+<div align="center">
+<img src="https://media.giphy.com/media/xUPGcguWZHRC2HyBRS/giphy.gif" width="420" alt="idea guy vs implementation guy" />
+<br/>
+<sub><i>Him: "just build it, it's a simple idea" — Me, three days deep in Mongoose schema errors</i></sub>
+</div>
+
+---
+
+## 🖥️ Live URL
+
+<div align="center">
+
+### 🔗 [codecommando404.vercel.app](https://codecommando404.vercel.app)
+
+</div>
+
+---
+
+## ✨ What It Does
+
+- 📋 **Task management** — assign to individuals or whole groups, set deadlines & priority
+- 📅 **Meeting scheduler** — with a real date/time picker (no more typing `12:55 AM` and getting `6:55 PM` 🥲)
+- 🔔 **Push notifications** — deadline reminders at 48h / 24h / 1h, delivered instantly (not a minute late, we fixed that)
+- 🏆 **Leaderboards** — friendly competitive pressure to actually finish your tasks
+- 💬 **Messaging** — direct threads between admin and members
+- 📢 **Announcements** — broadcast to the whole team
+- 🖼️ **Showcase** — flex finished project work
+- 🔐 **Role-based admin console** — because not everyone should touch production
+
+---
+
+## 🛠️ Tech Stack
+
+<div align="center">
+
+### Frontend
+![Next.js](https://img.shields.io/badge/Next.js_14-000000?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)
+
+### Backend & Data
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white)
+![NextAuth](https://img.shields.io/badge/NextAuth.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
+
+### Notifications & Extras
+![Web Push](https://img.shields.io/badge/Web_Push_API-FF6B6B?style=for-the-badge&logo=googlechrome&logoColor=white)
+![Vercel Blob](https://img.shields.io/badge/Vercel_Blob-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![React Hot Toast](https://img.shields.io/badge/React_Hot_Toast-FF4154?style=for-the-badge)
+![Lucide Icons](https://img.shields.io/badge/Lucide_Icons-000000?style=for-the-badge)
+![date-fns](https://img.shields.io/badge/date--fns-770C56?style=for-the-badge)
+![React Datepicker](https://img.shields.io/badge/React_Datepicker-2CA5E0?style=for-the-badge)
+
+### Deployment & Ops
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Cron Job.org](https://img.shields.io/badge/cron--job.org-E8342B?style=for-the-badge&logo=clockify&logoColor=white)
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![VS Code](https://img.shields.io/badge/VS_Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+
+</div>
+
+---
+
+## 😩 Designer vs Developer, a Timeless Tale
+
+<div align="center">
+<img src="./assets/developer_vs_designer_fighting.gif" width="700" alt="Developer vs Designer fighting it out"/>
+<br/>
+<sub><i>Every sprint planning meeting, summarized in one image.</i></sub>
+</div>
+
+<br/>
+
+<table align="center">
+<tr>
+<td align="center" width="50%">
+
+**🎨 The Designer**
+
+<img src="https://media.giphy.com/media/3orieVZSKZ8W3milgY/giphy.gif" width="260"/>
+
+*"Just move the button 2px to the left"*
+
+</td>
+<td align="center" width="50%">
+
+**🧑‍💻 The Developer**
+
+<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" width="260"/>
+
+*rebuilds entire component tree*
+
+</td>
+</tr>
+</table>
+
+<div align="center">
+<img src="https://media.giphy.com/media/QMHoU66sBXqqLqYvGO/giphy.gif" width="450" alt="pixel perfect vs it works on my machine"/>
+<br/>
+<sub><i>Pixel-perfect Figma vs. "it works on my machine" — the eternal war</i></sub>
+</div>
+
+---
+
+## 🚀 Getting Started
 
 ```bash
+# clone it
+git clone https://github.com/<your-username>/code-commando-404.git
+cd code-commando-404/taskflow
+
+# install
 npm install
-cp .env.example .env.local   # fill in MONGODB_URI + NEXTAUTH_SECRET
+
+# set up your env
+cp .env.example .env.local
+# fill in MONGODB_URI, NEXTAUTH_SECRET, VAPID keys, BLOB tokens, CRON_SECRET etc.
+
+# run it
 npm run dev
 ```
 
-## Features
-- **Projects**: admins create as many projects as needed. Each project has
-  its own members, groups, tasks, files and links — nothing bleeds between
-  projects.
-- **Team & groups**: add any team member to a project, then group 2 or more
-  of them together (e.g. "Frontend squad") so a task can be assigned to the
-  whole group in one shot instead of person by person.
-- **Tasks**: assign to one person, several people, or a group; attach PDFs,
-  DOCs, images, or a Figma link; edit or delete a task at any time; deadline,
-  priority, and live pending/completed status throughout.
-- **Files & links**: admins upload files straight from their PC or paste a
-  link (Figma, Drive, anything) into a project — every member of that
-  project can see, open, and (if admin) rename or remove it.
-- **User management**: add members, block or unblock an account (a blocked
-  account can't sign in), set a profile photo, see per-member completion
-  stats (on-time vs late).
-- **Live updates**: the notification bell, activity feed, and announcements
-  poll in the background (every 8–20s) so new assignments, completions, and
-  posts show up without a manual refresh — this works the same on Vercel as
-  anywhere else, since it doesn't depend on a socket staying open.
-- **Responsive**: the whole dashboard, including the sidebar (an off-canvas
-  drawer on mobile), project tabs, and every card grid, adapts from phone to
-  desktop.
+Open [http://localhost:3000](http://localhost:3000) and start commanding. 🫡
 
-## Notes
-- Uploaded files are written to `public/uploads` via the `/api/upload`
-  route. **Vercel's filesystem is ephemeral** — files written at runtime
-  don't persist across deployments/cold starts. For production use on
-  Vercel, swap that route for S3, Cloudinary, or Vercel Blob storage; the
-  rest of the app only cares about the `{ name, url, type }` shape it
-  returns, so the swap is contained to that one file.
-- Free/busy status is derived live from whether a member has any pending
-  task, so it never drifts out of sync.
-- A task assigned to a group is shared by every member of that group; any
-  one of them marking it "finished" completes it for the whole group.
+---
+
+## 🔐 Environment Variables
+
+| Variable | What it's for |
+|---|---|
+| `MONGODB_URI` | Database connection |
+| `NEXTAUTH_SECRET` / `NEXTAUTH_URL` | Auth session handling |
+| `BLOB_STORE_ID` / `BLOB_READ_WRITE_TOKEN` | File uploads (Vercel Blob) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | Push notifications |
+| `CRON_SECRET` | Protects the deadline-reminder cron endpoint |
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Dark/light theme toggle
+- [ ] Slack/Discord webhook integration
+- [ ] Mobile app wrapper
+- [ ] Recurring meetings
+- [ ] Export reports to PDF
+
+---
+
+<div align="center">
+
+### 🧡 Credits
+
+Original spark of the idea — **[Binary-Eclipse](https://github.com/Binary-Eclipse)**, my brother, my co-conspirator in questionable 2 AM feature decisions.
+
+<img src="https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif" width="300" alt="brothers coding"/>
+
+**If this repo made your life easier, drop a ⭐ — it costs nothing and feeds my ego.**
+
+</div>
