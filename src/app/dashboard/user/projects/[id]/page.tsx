@@ -3,16 +3,18 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, Users, FolderOpen, ListChecks, Trophy } from "lucide-react";
+import { ArrowLeft, Users, FolderOpen, ListChecks, Trophy, MessageSquare, CalendarClock, Linkedin, Github } from "lucide-react";
 import clsx from "clsx";
 import TaskCard from "@/components/TaskCard";
 import ResourceList from "@/components/ResourceList";
 import ProjectLeaderboard from "@/components/ProjectLeaderboard";
+import MeetingList from "@/components/MeetingList";
 
 const POLL_MS = 20000;
 
 const TABS = [
   { id: "tasks", label: "My tasks", icon: ListChecks },
+  { id: "meetings", label: "Meetings", icon: CalendarClock },
   { id: "leaderboard", label: "Leaderboard", icon: Trophy },
   { id: "files", label: "Files & links", icon: FolderOpen },
   { id: "team", label: "Team", icon: Users }
@@ -60,6 +62,16 @@ export default function MemberProjectDetail() {
           </span>
         </div>
         {project.description && <p className="text-mute text-sm mt-1 max-w-2xl">{project.description}</p>}
+        {project.whatsappLink && (
+          
+          <a  href={project.whatsappLink}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 mt-2 text-xs text-[#25D366] hover:underline"
+          >
+            <MessageSquare size={12} /> Project WhatsApp group
+          </a>
+        )}
       </div>
 
       <div className="flex gap-1 mb-6 border-b border-line overflow-x-auto">
@@ -108,6 +120,8 @@ export default function MemberProjectDetail() {
         </div>
       )}
 
+      {tab === "meetings" && <MeetingList projectId={id} members={project.members} canManage={false} />}
+
       {tab === "leaderboard" && <ProjectLeaderboard projectId={id} />}
 
       {tab === "files" && (
@@ -123,10 +137,26 @@ export default function MemberProjectDetail() {
               <div className="w-9 h-9 rounded-full flex items-center justify-center text-ink text-xs font-medium shrink-0 overflow-hidden" style={{ background: m.avatarColor }}>
                 {m.avatarUrl ? <img src={m.avatarUrl} className="w-full h-full object-cover" alt="" /> : m.name[0].toUpperCase()}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="text-sm text-paper truncate">{m.name}</div>
                 <div className="text-xs text-mute truncate">{m.title}</div>
               </div>
+              {(m.linkedinUrl || m.githubUrl) && (
+                <div className="flex items-center gap-1 shrink-0">
+                  {m.linkedinUrl && (
+                    <a href={m.linkedinUrl} target="_blank" rel="noreferrer" title="LinkedIn"
+                       className="w-7 h-7 rounded-md bg-panel2 border border-line flex items-center justify-center text-mute hover:text-[#0A66C2] hover:border-[#0A66C2]/40 transition-colors">
+                      <Linkedin size={12} />
+                    </a>
+                  )}
+                  {m.githubUrl && (
+                    <a href={m.githubUrl} target="_blank" rel="noreferrer" title="GitHub"
+                       className="w-7 h-7 rounded-md bg-panel2 border border-line flex items-center justify-center text-mute hover:text-paper hover:border-paper/40 transition-colors">
+                      <Github size={12} />
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

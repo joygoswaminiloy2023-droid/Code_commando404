@@ -37,8 +37,8 @@ export default function AnalyticsChart({ tasks }: { tasks: any[] }) {
           labelStyle={{ color: "#EAF0F6" }}
         />
         <Legend wrapperStyle={{ fontSize: 12, color: "#7C8B9C" }} />
-        <Bar dataKey="onTime" name="On time" stackId="a" fill="#5EF1C0" radius={[0, 0, 0, 0]} />
-        <Bar dataKey="late" name="Late" stackId="a" fill="#F26B6B" radius={[0, 0, 0, 0]} />
+        <Bar dataKey="onTime" name="On time" stackId="a" fill="#E8342B" radius={[0, 0, 0, 0]} />
+        <Bar dataKey="late" name="Late" stackId="a" fill="#FF7A45" radius={[0, 0, 0, 0]} />
         <Bar dataKey="pending" name="Pending" stackId="a" fill="#F5B95B" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>

@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { ArrowRight, Terminal, FolderKanban, Users2, ShieldCheck } from "lucide-react";
+import { ArrowRight, FolderKanban, Users2, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -40,10 +40,17 @@ export default function LoginPage() {
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute -bottom-32 -left-32 w-[420px] h-[420px] rounded-full bg-[#7C9CF5]/10 blur-[110px]"
+        className="absolute -bottom-32 -left-32 w-[420px] h-[420px] rounded-full bg-signal2/10 blur-[110px]"
         animate={{ opacity: [0.4, 0.8, 0.4], scale: [1, 1.1, 1] }}
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
       />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.04]">
+        <motion.div
+          className="absolute inset-x-0 h-1/3 bg-gradient-to-b from-transparent via-signal to-transparent"
+          animate={{ y: ["-100%", "400%"] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
 
       <div className="relative z-10 w-full max-w-5xl grid md:grid-cols-2 gap-12 md:gap-16 items-center">
         <motion.div
@@ -57,8 +64,8 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <div className="w-8 h-8 rounded-lg bg-signal/10 border border-signal/30 flex items-center justify-center">
-              <Terminal size={16} />
+            <div className="w-9 h-9 rounded-lg overflow-hidden">
+              <img src="/logo.png" alt="Code Commando 404" className="w-full h-full object-cover" />
             </div>
             <span className="font-mono text-xs tracking-[0.2em] uppercase">Code Commando 404</span>
           </motion.div>

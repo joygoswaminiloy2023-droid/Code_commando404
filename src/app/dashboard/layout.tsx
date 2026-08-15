@@ -48,7 +48,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ) : (
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-ink text-xs font-medium"
-                style={{ background: user.avatarColor || "#5EF1C0" }}
+                style={{ background: user.avatarColor || "#E8342B" }}
               >
                 {user.name?.[0]?.toUpperCase()}
               </div>

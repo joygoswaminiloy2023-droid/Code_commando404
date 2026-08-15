@@ -20,7 +20,7 @@ export default function ProjectFormModal({
   onSaved: () => void;
 }) {
   const isEdit = !!project;
-  const [form, setForm] = useState({ name: "", description: "", status: "active", color: "#5EF1C0" });
+  const [form, setForm] = useState({ name: "", description: "", status: "active", color: "#E8342B", whatsappLink: "" });
   const [selected, setSelected] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -30,7 +30,8 @@ export default function ProjectFormModal({
         name: project?.name || "",
         description: project?.description || "",
         status: project?.status || "active",
-        color: project?.color || "#5EF1C0"
+        color: project?.color || "#E8342B",
+        whatsappLink: project?.whatsappLink || ""
       });
       setSelected((project?.members || []).map((m: any) => m._id || m));
     }
@@ -67,7 +68,7 @@ export default function ProjectFormModal({
     }
   }
 
-  const colors = ["#5EF1C0", "#F5B95B", "#F26B6B", "#7C9CF5", "#E17CF5"];
+  const colors = ["#E8342B", "#F5B95B", "#FF7A45", "#7C9CF5", "#E17CF5"];
 
   return (
     <AnimatePresence>
@@ -138,6 +139,16 @@ export default function ProjectFormModal({
                 </div>
               </div>
             </div>
+
+            <label className="block text-xs font-mono uppercase tracking-wide text-mute mb-2">
+              WhatsApp group link <span className="normal-case text-mute/70">(optional)</span>
+            </label>
+            <input
+              value={form.whatsappLink}
+              onChange={(e) => setForm({ ...form, whatsappLink: e.target.value })}
+              className="w-full bg-ink border border-line rounded-lg px-4 py-2.5 text-paper mb-4 focus-ring outline-none text-sm"
+              placeholder="https://chat.whatsapp.com/..."
+            />
 
             <label className="block text-xs font-mono uppercase tracking-wide text-mute mb-2">
               Project members ({selected.length} selected)

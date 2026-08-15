@@ -42,7 +42,7 @@ export default function MemberPicker({
             </div>
             <div
               className="w-6 h-6 rounded-full flex items-center justify-center text-ink text-[10px] font-medium shrink-0"
-              style={{ background: m.avatarColor || "#5EF1C0" }}
+              style={{ background: m.avatarColor || "#E8342B" }}
             >
               {m.avatarUrl ? (
                 <img src={m.avatarUrl} className="w-6 h-6 rounded-full object-cover" alt="" />

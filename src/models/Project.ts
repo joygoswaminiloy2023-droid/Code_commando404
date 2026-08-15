@@ -24,7 +24,9 @@ const ProjectSchema = new Schema(
     name: { type: String, required: true },
     description: { type: String, default: "" },
     status: { type: String, enum: ["planning", "active", "on-hold", "completed"], default: "active" },
-    color: { type: String, default: "#5EF1C0" },
+    color: { type: String, default: "#E8342B" },
+    // Optional per-project WhatsApp group invite link, set by the admin.
+    whatsappLink: { type: String, default: "" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     members: [{ type: Schema.Types.ObjectId, ref: "User" }],
     groups: [GroupSchema],

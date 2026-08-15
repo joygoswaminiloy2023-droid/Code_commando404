@@ -10,28 +10,24 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: "Only an admin can add project files or links." }, { status: 403 });
   }
   await connectDB();
-  const body = await req.json();
-
-  const { kind, name, url, fileType } = body;
-  if (!kind || !name?.trim() || !url?.trim()) {
-    return NextResponse.json({ error: "kind, name and url are required." }, { status: 400 });
+  const { kind, name, url, fileType } = await req.json();
+  if (!name?.trim() || !url?.trim()) {
+    return NextResponse.json({ error: "Name and URL are required." }, { status: 400 });
   }
 
   const project: any = await Project.findById(params.id);
   if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   project.resources.push({
-    kind,
+    kind: kind === "link" ? "link" : "file",
     name: name.trim(),
-    url: url.trim(),
-    fileType,
+    url,
+    fileType: fileType || (kind === "link" ? "link" : "other"),
     uploadedBy: (session.user as any).id
   });
-
   await project.save();
-  const populated = await Project.findById(project._id)
-    .populate("resources.uploadedBy", "name avatarColor avatarUrl")
-    .lean();
+
+  const populated = await Project.findById(project._id).populate("resources.uploadedBy", "name avatarColor avatarUrl").lean();
 
   return NextResponse.json((populated as any).resources, { status: 201 });
 }

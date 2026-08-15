@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   const project: any = await Project.findById(params.id)
     .populate("createdBy", "name avatarColor avatarUrl")
-    .populate("members", "name avatarColor avatarUrl title status email")
+    .populate("members", "name avatarColor avatarUrl title status email linkedinUrl githubUrl")
     .populate("groups.members", "name avatarColor avatarUrl title status")
     .populate("resources.uploadedBy", "name avatarColor avatarUrl")
     .lean();
@@ -39,12 +39,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   const project: any = await Project.findById(params.id);
   if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const allowed = ["name", "description", "status", "color", "members"];
+  const allowed = ["name", "description", "status", "color", "members", "whatsappLink"];
   for (const key of allowed) {
     if (body[key] !== undefined) (project as any)[key] = body[key];
   }
-  // If a member was removed from the project, also drop them from any group
-  // inside it so groups never silently keep an outsider.
   if (body.members) {
     const stillIn = new Set(body.members.map((m: string) => m.toString()));
     project.groups = project.groups.map((g: any) => ({
@@ -56,7 +54,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   await project.save();
   const populated = await Project.findById(project._id)
     .populate("createdBy", "name avatarColor avatarUrl")
-    .populate("members", "name avatarColor avatarUrl title status email")
+    .populate("members", "name avatarColor avatarUrl title status email linkedinUrl githubUrl")
     .populate("groups.members", "name avatarColor avatarUrl title status")
     .populate("resources.uploadedBy", "name avatarColor avatarUrl")
     .lean();

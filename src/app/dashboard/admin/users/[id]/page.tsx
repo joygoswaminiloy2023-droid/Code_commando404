@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import TaskCard from "@/components/TaskCard";
 import clsx from "clsx";
+import { Linkedin, Github } from "lucide-react";
 
 export default function MemberProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -29,8 +30,32 @@ export default function MemberProfilePage() {
         <div className="min-w-0">
           <h1 className="font-display text-2xl text-paper truncate">{user.name}</h1>
           <p className="text-mute text-sm truncate">{user.title} · {user.email}</p>
+          <div className="flex items-center gap-2 mt-2">
+            {user.linkedinUrl && (
+              
+               <a href={user.linkedinUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="w-7 h-7 rounded-md bg-panel2 border border-line flex items-center justify-center text-mute hover:text-[#0A66C2] hover:border-[#0A66C2]/40 transition-colors"
+                title="LinkedIn"
+              >
+                <Linkedin size={13} />
+              </a>
+            )}
+            {user.githubUrl && (
+              
+               <a href={user.githubUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="w-7 h-7 rounded-md bg-panel2 border border-line flex items-center justify-center text-mute hover:text-paper hover:border-paper/40 transition-colors"
+                title="GitHub"
+              >
+                <Github size={13} />
+              </a>
+            )}
+          </div>
           {user.isBlocked && (
-            <span className="inline-block mt-1 text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 rounded border text-coral border-coral/30">
+            <span className="inline-block mt-2 text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 rounded border text-coral border-coral/30">
               Blocked
             </span>
           )}

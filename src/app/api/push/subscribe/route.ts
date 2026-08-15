@@ -14,6 +14,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid subscription." }, { status: 400 });
   }
 
+  // Re-subscribing with the same endpoint (e.g. re-opening the installed
+  // app) updates the owner rather than creating a duplicate row.
   await PushSubscription.findOneAndUpdate(
     { endpoint: subscription.endpoint },
     {

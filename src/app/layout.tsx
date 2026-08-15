@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+// src/app/layout.tsx
+import "react-datepicker/dist/react-datepicker.css";
+// ...your other imports (globals.css etc.)
 
 const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", weight: ["500", "700"] });
 const body = Inter({ subsets: ["latin"], variable: "--font-body", weight: ["400", "500", "600"] });
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B0F14",
+  themeColor: "#0A0A0C",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

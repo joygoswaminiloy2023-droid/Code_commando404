@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Only an admin can create projects." }, { status: 403 });
   }
   await connectDB();
-  const { name, description, status, color, members } = await req.json();
+  const { name, description, status, color, members, whatsappLink } = await req.json();
   if (!name?.trim()) {
     return NextResponse.json({ error: "Project name is required." }, { status: 400 });
   }
@@ -36,7 +36,8 @@ export async function POST(req: Request) {
     name: name.trim(),
     description: description || "",
     status: status || "active",
-    color: color || "#5EF1C0",
+    color: color || "#E8342B",
+    whatsappLink: whatsappLink || "",
     createdBy: (session.user as any).id,
     members: members || [],
     groups: [],

@@ -32,12 +32,15 @@ export default function AvatarUpload({
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || `Upload failed (${res.status}).`);
+      }
       const data = await res.json();
       onUploaded(data.url);
       toast.success("Profile photo updated.");
-    } catch {
-      toast.error("Couldn't upload that image.");
+    } catch (err: any) {
+      toast.error(err?.message || "Couldn't upload that image.");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -56,7 +59,7 @@ export default function AvatarUpload({
       ) : (
         <div
           className="rounded-full flex items-center justify-center text-ink font-medium"
-          style={{ width: size, height: size, background: avatarColor || "#5EF1C0", fontSize: size / 2.6 }}
+          style={{ width: size, height: size, background: avatarColor || "#E8342B", fontSize: size / 2.6 }}
         >
           {name?.[0]?.toUpperCase()}
         </div>

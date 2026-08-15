@@ -7,6 +7,7 @@ import Notification from "@/models/Notification";
 import Activity from "@/models/Activity";
 import Project from "@/models/Project";
 import { sendPushToUsers } from "@/lib/push";
+import { waitUntil } from "@vercel/functions";
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -80,7 +81,7 @@ export async function POST(req: Request) {
     assigneeName: groupName || populated.assignees.map((a: any) => a.name).join(", ")
   });
 
-  sendPushToUsers(assignees, { title: "New task assigned", body: message, url: "/dashboard" });
+  await waitUntil(sendPushToUsers(assignees, { title: "New task assigned", body: message, url: "/dashboard" }));
 
   return NextResponse.json(populated, { status: 201 });
 }

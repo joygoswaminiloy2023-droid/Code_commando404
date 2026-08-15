@@ -17,8 +17,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             fontFamily: "var(--font-body)",
             fontSize: "14px"
           },
-          success: { iconTheme: { primary: "#5EF1C0", secondary: "#0B0F14" } },
-          error: { iconTheme: { primary: "#F26B6B", secondary: "#0B0F14" } }
+          success: { iconTheme: { primary: "#E8342B", secondary: "#0A0A0C" } },
+          error: { iconTheme: { primary: "#FF7A45", secondary: "#0A0A0C" } }
         }}
       />
     </SessionProvider>

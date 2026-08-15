@@ -39,6 +39,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       const onTimeRate = s.completed > 0 ? s.onTime / s.completed : 0;
       return { user: m, completed: s.completed, onTime: s.onTime, onTimeRate };
     })
+    // Rank by total completed tasks first, then by on-time rate as the tiebreaker.
     .sort((a: any, b: any) => b.completed - a.completed || b.onTimeRate - a.onTimeRate);
 
   return NextResponse.json(leaderboard);

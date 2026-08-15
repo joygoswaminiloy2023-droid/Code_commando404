@@ -6,7 +6,6 @@ import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { Terminal } from "lucide-react";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -57,8 +56,8 @@ export default function SetupPage() {
         className="relative z-10 w-full max-w-md bg-panel border border-line rounded-xl2 p-8 shadow-glow"
       >
         <div className="flex items-center gap-2 text-signal mb-6">
-          <div className="w-8 h-8 rounded-lg bg-signal/10 border border-signal/30 flex items-center justify-center">
-            <Terminal size={16} />
+          <div className="w-9 h-9 rounded-lg overflow-hidden">
+            <img src="/logo.png" alt="Code Commando 404" className="w-full h-full object-cover" />
           </div>
           <span className="font-mono text-xs tracking-[0.2em] uppercase">Code Commando 404</span>
         </div>

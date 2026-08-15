@@ -6,6 +6,7 @@ import Task from "@/models/Task";
 import Notification from "@/models/Notification";
 import Activity from "@/models/Activity";
 import { sendPushToUsers } from "@/lib/push";
+import { waitUntil } from "@vercel/functions";
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -54,11 +55,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     await Activity.create({ kind: "completed", taskTitle: task.title, assigneeName: user.name });
 
-    sendPushToUsers([assignedById], {
+    await waitUntil(sendPushToUsers([assignedById], {
       title: "Task completed",
       body: message,
       url: "/dashboard/admin/projects/" + projectId
-    });
+    }));
 
     return NextResponse.json(populated);
   }

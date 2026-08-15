@@ -16,11 +16,13 @@ export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   await connectDB();
-  const { title, bio, avatarUrl } = await req.json();
+  const { title, bio, avatarUrl, linkedinUrl, githubUrl } = await req.json();
   const update: any = {};
   if (title !== undefined) update.title = title;
   if (bio !== undefined) update.bio = bio;
   if (avatarUrl !== undefined) update.avatarUrl = avatarUrl;
+  if (linkedinUrl !== undefined) update.linkedinUrl = linkedinUrl;
+  if (githubUrl !== undefined) update.githubUrl = githubUrl;
   const user = await User.findByIdAndUpdate(
     (session.user as any).id,
     { $set: update },

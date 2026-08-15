@@ -6,7 +6,7 @@ import Message from "@/models/Message";
 import Notification from "@/models/Notification";
 import User from "@/models/User";
 import { sendPushToUsers } from "@/lib/push";
-
+import { waitUntil } from "@vercel/functions";
 // GET /api/messages            → member: their own thread
 // GET /api/messages?user=<id>  → admin: a specific member's thread
 // GET /api/messages?threads=1  → admin: one row per member who has messaged in, with last message + unread count
@@ -76,16 +76,16 @@ export async function POST(req: Request) {
 
   if (me.role === "admin") {
     await Notification.create({ recipient: threadUserId, message: `Admin replied: ${body.trim()}`, type: "message" });
-    sendPushToUsers([threadUserId], { title: "New reply from admin", body: body.trim(), url: "/dashboard/messages" });
+    await waitUntil(sendPushToUsers([threadUserId], { title: "New reply from admin", body: body.trim(), url: "/dashboard/messages" }));
   } else {
     const admins = await User.find({ role: "admin" }).select("_id").lean();
     await Notification.insertMany(
       admins.map((a: any) => ({ recipient: a._id, message: `${me.name}: ${body.trim()}`, type: "message" }))
     );
-    sendPushToUsers(
+    await waitUntil(sendPushToUsers(
       admins.map((a: any) => a._id.toString()),
       { title: `Message from ${me.name}`, body: body.trim(), url: `/dashboard/admin/messages/${me.id}` }
-    );
+    ));
   }
 
   return NextResponse.json(populated, { status: 201 });

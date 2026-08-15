@@ -38,7 +38,7 @@ export async function POST(req: Request) {
   }
 
   const hashed = await bcrypt.hash(password, 10);
-  const palette = ["#5EF1C0", "#F5B95B", "#F26B6B", "#7C9CF5", "#E17CF5"];
+  const palette = ["#E8342B", "#F5B95B", "#FF7A45", "#7C9CF5", "#E17CF5"];
   const avatarColor = palette[Math.floor(Math.random() * palette.length)];
 
   const user = await User.create({

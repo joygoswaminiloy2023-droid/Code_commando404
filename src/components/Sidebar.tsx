@@ -4,9 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  LayoutGrid, Users, User, FolderKanban, LogOut, Terminal, X,
+  LayoutGrid, Users, User, FolderKanban, LogOut, X,
   MessageCircle, StickyNote, Sparkles, Video
 } from "lucide-react";
+import { motion } from "framer-motion";
 import clsx from "clsx";
 
 export default function Sidebar({
@@ -46,9 +47,13 @@ export default function Sidebar({
     <>
       <div className="flex items-center justify-between mb-10 px-2">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-signal/10 border border-signal/30 flex items-center justify-center">
-            <Terminal size={16} className="text-signal" />
-          </div>
+          <motion.div
+            animate={{ boxShadow: ["0 0 0 0 rgba(232,52,43,0.35)", "0 0 0 6px rgba(232,52,43,0)"] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
+            className="w-9 h-9 rounded-lg overflow-hidden shrink-0"
+          >
+            <img src="/logo.png" alt="Code Commando 404" className="w-full h-full object-cover" />
+          </motion.div>
           <div className="leading-tight">
             <div className="font-display text-sm text-paper tracking-tight">Code Commando</div>
             <div className="font-mono text-[10px] text-signal tracking-[0.2em]">404</div>

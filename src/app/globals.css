@@ -5,8 +5,8 @@
 * { box-sizing: border-box; }
 
 html, body {
-  background: #0B0F14;
-  color: #EAF0F6;
+  background: #0A0A0C;
+  color: #F2F3F5;
 }
 
 body {
@@ -14,12 +14,57 @@ body {
 }
 
 ::selection {
-  background: rgba(94, 241, 192, 0.25);
+  background: rgba(232, 52, 43, 0.28);
+}
+
+.meeting-datepicker.react-datepicker {
+  background-color: #14161a; /* match your --panel */
+  border: 1px solid #262a30; /* match your --line */
+  font-family: inherit;
+  color: #f2f2f0; /* match your --paper */
+}
+.meeting-datepicker .react-datepicker__header {
+  background-color: #1a1d22;
+  border-bottom: 1px solid #262a30;
+}
+.meeting-datepicker .react-datepicker__current-month,
+.meeting-datepicker .react-datepicker-time__header,
+.meeting-datepicker .react-datepicker__day-name {
+  color: #f2f2f0;
+}
+.meeting-datepicker .react-datepicker__day {
+  color: #cfd3d8;
+}
+.meeting-datepicker .react-datepicker__day:hover {
+  background-color: #262a30;
+}
+.meeting-datepicker .react-datepicker__day--selected,
+.meeting-datepicker .react-datepicker__day--keyboard-selected {
+  background-color: #e8342b; /* your --signal */
+  color: #ffffff;
+}
+.meeting-datepicker .react-datepicker__time-container,
+.meeting-datepicker .react-datepicker__time-box,
+.meeting-datepicker .react-datepicker__time-list {
+  background-color: #14161a;
+}
+.meeting-datepicker .react-datepicker__time-list-item {
+  color: #cfd3d8;
+}
+.meeting-datepicker .react-datepicker__time-list-item:hover {
+  background-color: #262a30 !important;
+}
+.meeting-datepicker .react-datepicker__time-list-item--selected {
+  background-color: #e8342b !important;
+  color: #ffffff !important;
+}
+.meeting-datepicker .react-datepicker__triangle {
+  display: none;
 }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #232D3A; border-radius: 8px; }
+::-webkit-scrollbar-thumb { background: #2C2C30; border-radius: 8px; }
 
 .font-mono-num { font-variant-numeric: tabular-nums; }
 
@@ -32,6 +77,13 @@ body {
 }
 
 .focus-ring:focus-visible {
-  outline: 2px solid #5EF1C0;
+  outline: 2px solid #E8342B;
   outline-offset: 2px;
+}
+
+/* Subtle tactical HUD texture used behind auth screens and empty states */
+.grid-overlay {
+  background-image: linear-gradient(rgba(242,243,245,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(242,243,245,0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
 }

@@ -3,18 +3,24 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
+import { Linkedin, Github } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 
 export default function ProfilePage() {
   const { data: session, update } = useSession();
-  const [form, setForm] = useState({ title: "", bio: "" });
+  const [form, setForm] = useState({ title: "", bio: "", linkedinUrl: "", githubUrl: "" });
   const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetch("/api/profile").then((r) => r.json()).then((u) => {
-      setForm({ title: u.title || "", bio: u.bio || "" });
+      setForm({
+        title: u.title || "",
+        bio: u.bio || "",
+        linkedinUrl: u.linkedinUrl || "",
+        githubUrl: u.githubUrl || ""
+      });
       setAvatarUrl(u.avatarUrl || "");
       setLoading(false);
     });
@@ -36,13 +42,18 @@ export default function ProfilePage() {
   }
 
   async function handleAvatarUploaded(url: string) {
-    setAvatarUrl(url);
-    await fetch("/api/profile", {
+    const res = await fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ avatarUrl: url })
     });
+    if (!res.ok) {
+      toast.error("The photo uploaded but couldn't be saved to your profile. Try again.");
+      return;
+    }
+    setAvatarUrl(url);
     await update({ avatarUrl: url });
+    toast.success("Profile photo saved — visible to everyone now.");
   }
 
   const user = session?.user as any;
@@ -80,6 +91,26 @@ export default function ProfilePage() {
           rows={4}
           className="w-full bg-ink border border-line rounded-lg px-4 py-2.5 text-paper mb-6 focus-ring outline-none text-sm resize-none"
           placeholder="A line about what you work on."
+        />
+
+        <label className="block text-xs font-mono uppercase tracking-wide text-mute mb-2 flex items-center gap-1.5">
+          <Linkedin size={13} /> LinkedIn profile
+        </label>
+        <input
+          value={form.linkedinUrl}
+          onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })}
+          className="w-full bg-ink border border-line rounded-lg px-4 py-2.5 text-paper mb-4 focus-ring outline-none text-sm"
+          placeholder="https://linkedin.com/in/..."
+        />
+
+        <label className="block text-xs font-mono uppercase tracking-wide text-mute mb-2 flex items-center gap-1.5">
+          <Github size={13} /> GitHub profile
+        </label>
+        <input
+          value={form.githubUrl}
+          onChange={(e) => setForm({ ...form, githubUrl: e.target.value })}
+          className="w-full bg-ink border border-line rounded-lg px-4 py-2.5 text-paper mb-6 focus-ring outline-none text-sm"
+          placeholder="https://github.com/..."
         />
 
         <button

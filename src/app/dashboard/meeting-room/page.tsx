@@ -1,7 +1,6 @@
 "use client";
 
 import { MessageSquare, Video, Users2, ArrowUpRight } from "lucide-react";
-import Link from "next/link";
 
 const rooms = [
   {
@@ -39,7 +38,7 @@ export default function MeetingRoomPage() {
         {rooms.map((r) => {
           const Icon = r.icon;
           return (
-            <Link
+            <a
               key={r.name}
               href={r.href}
               target="_blank"
@@ -54,7 +53,7 @@ export default function MeetingRoomPage() {
               </div>
               <h3 className="font-display text-lg text-paper mb-1">{r.name}</h3>
               <p className="text-sm text-mute leading-relaxed">{r.description}</p>
-            </Link>
+            </a>
           );
         })}
       </div>

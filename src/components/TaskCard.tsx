@@ -106,7 +106,7 @@ export default function TaskCard({
                 key={a._id}
                 title={a.name}
                 className="w-6 h-6 rounded-full flex items-center justify-center text-ink text-[10px] font-medium border-2 border-panel overflow-hidden"
-                style={{ background: a.avatarColor || "#5EF1C0" }}
+                style={{ background: a.avatarColor || "#E8342B" }}
               >
                 {a.avatarUrl ? <img src={a.avatarUrl} className="w-full h-full object-cover" alt="" /> : a.name?.[0]?.toUpperCase()}
               </div>
