@@ -70,16 +70,16 @@ export async function POST(req: Request) {
     { path: "attendees", select: "name avatarColor avatarUrl" }
   ]);
 
-  const when = new Date(scheduledAt).toLocaleString();
- const message = `... ${new Date(scheduledAt).toLocaleString("en-US", {
-  timeZone: "Asia/Dhaka",
-  dateStyle: "medium",
-  timeStyle: "short"
-})} ...`;
+  const message = `"${title.trim()}" scheduled in ${proj.name} — ${new Date(scheduledAt).toLocaleString("en-US", {
+    timeZone: "Asia/Dhaka",
+    dateStyle: "medium",
+    timeStyle: "short"
+  })}.`;
+
   await Notification.insertMany(
     attendees.map((a: string) => ({ recipient: a, message, type: "meeting" }))
   );
-  await waitUntil(sendPushToUsers(attendees, { title: "Meeting scheduled", body: message, url: `/dashboard/admin/projects/${project}` }));
+  waitUntil(sendPushToUsers(attendees, { title: "Meeting scheduled", body: message, url: `/dashboard/admin/projects/${project}` }));
 
   return NextResponse.json(populated, { status: 201 });
 }
