@@ -23,11 +23,7 @@ export async function POST(req: Request) {
 
     const safeName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_")}`;
 
-    // On Vercel (and any other read-only/ephemeral filesystem) uploads must go
-    // to real object storage or they'd vanish between requests. Vercel Blob is
-    // used automatically whenever a Blob store is attached to the project
-    // (which sets BLOB_READ_WRITE_TOKEN for you). Locally, without that token,
-    // we fall back to writing into public/uploads so dev works with zero setup.
+   
     if (process.env.BLOB_READ_WRITE_TOKEN) {
       const { put } = await import("@vercel/blob");
       const blob = await put(`uploads/${safeName}`, file, {
