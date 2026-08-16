@@ -71,7 +71,11 @@ export async function POST(req: Request) {
   ]);
 
   const when = new Date(scheduledAt).toLocaleString();
-  const message = `"${title.trim()}" scheduled in ${proj.name} — ${when}.`;
+ const message = `... ${new Date(scheduledAt).toLocaleString("en-US", {
+  timeZone: "Asia/Dhaka",
+  dateStyle: "medium",
+  timeStyle: "short"
+})} ...`;
   await Notification.insertMany(
     attendees.map((a: string) => ({ recipient: a, message, type: "meeting" }))
   );
