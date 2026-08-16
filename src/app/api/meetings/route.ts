@@ -56,13 +56,23 @@ export async function POST(req: Request) {
   const proj: any = await Project.findById(project).lean();
   if (!proj) return NextResponse.json({ error: "Project not found." }, { status: 404 });
 
+  // If the meeting is scheduled with less lead time than a reminder stage's
+  // window represents, that stage would never be a meaningful heads-up —
+  // e.g. a meeting booked 1 hour out shouldn't trigger a "2 days away!"
+  // reminder. Pre-mark those stages as already sent so the cron sweep
+  // skips them and only the stages that make sense actually fire.
+  const leadTimeHours = (new Date(scheduledAt).getTime() - Date.now()) / (1000 * 60 * 60);
+
   const meeting = await Meeting.create({
     project,
     title: title.trim(),
     topic: topic || "",
     scheduledAt,
     scheduledBy: (session.user as any).id,
-    attendees
+    attendees,
+    remind48hSent: leadTimeHours < 48,
+    remind24hSent: leadTimeHours < 24,
+    remind1hSent: leadTimeHours < 1
   });
   const populated = await meeting.populate([
     { path: "project", select: "name color" },
