@@ -8,10 +8,6 @@ import Task from "@/models/Task";
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const me = session.user as any;
-  if (me.role !== "admin" && me.id !== params.id) {
-    return NextResponse.json({ error: "You can only view your own profile." }, { status: 403 });
-  }
 
   await connectDB();
   const user = await User.findById(params.id).select("-password").lean();
