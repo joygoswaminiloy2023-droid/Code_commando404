@@ -6,7 +6,7 @@ import Message from "@/models/Message";
 import Notification from "@/models/Notification";
 import User from "@/models/User";
 import { sendPushToUsers } from "@/lib/push";
-import { waitUntil } from "@vercel/functions";
+
 // GET /api/messages            → member: their own thread
 // GET /api/messages?user=<id>  → admin: a specific member's thread
 // GET /api/messages?threads=1  → admin: one row per member who has messaged in, with last message + unread count
@@ -17,7 +17,10 @@ export async function GET(req: Request) {
   const me = session.user as any;
   const { searchParams } = new URL(req.url);
 
-  if (me.role === "admin" && searchParams.get("threads")) {
+  if (searchParams.get("threads")) {
+    if (me.role !== "admin") {
+      return NextResponse.json({ error: "Admin only." }, { status: 403 });
+    }
     const messages = await Message.find().sort({ createdAt: 1 }).populate("user", "name avatarColor avatarUrl").lean();
     const byUser = new Map<string, any>();
     for (const m of messages as any[]) {
@@ -44,7 +47,6 @@ export async function GET(req: Request) {
     .populate("sender", "name avatarColor avatarUrl role")
     .lean();
 
-  // Mark incoming messages as read by whoever's viewing.
   if (me.role === "admin") {
     await Message.updateMany({ user: targetUserId, sender: targetUserId, readByAdmin: false }, { readByAdmin: true });
   } else {
@@ -76,16 +78,16 @@ export async function POST(req: Request) {
 
   if (me.role === "admin") {
     await Notification.create({ recipient: threadUserId, message: `Admin replied: ${body.trim()}`, type: "message" });
-    await waitUntil(sendPushToUsers([threadUserId], { title: "New reply from admin", body: body.trim(), url: "/dashboard/messages" }));
+    sendPushToUsers([threadUserId], { title: "New reply from admin", body: body.trim(), url: "/dashboard/messages" });
   } else {
     const admins = await User.find({ role: "admin" }).select("_id").lean();
     await Notification.insertMany(
       admins.map((a: any) => ({ recipient: a._id, message: `${me.name}: ${body.trim()}`, type: "message" }))
     );
-    await waitUntil(sendPushToUsers(
+    sendPushToUsers(
       admins.map((a: any) => a._id.toString()),
       { title: `Message from ${me.name}`, body: body.trim(), url: `/dashboard/admin/messages/${me.id}` }
-    ));
+    );
   }
 
   return NextResponse.json(populated, { status: 201 });
