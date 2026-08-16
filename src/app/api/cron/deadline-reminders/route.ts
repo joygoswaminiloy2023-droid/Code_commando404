@@ -42,7 +42,11 @@ export async function GET(req: Request) {
 
   let tasksNotified = 0;
   for (const t of tasks as any[]) {
-    const message = `"${t.title}" is due ${new Date(t.deadline).toLocaleString()} — about 2 days left.`;
+const message = `"${t.title}" is due ${new Date(t.deadline).toLocaleString("en-US", {
+  timeZone: "Asia/Dhaka",
+  dateStyle: "medium",
+  timeStyle: "short"
+})} — about 2 days left.`;
     const assigneeIds = t.assignees.map((a: any) => a._id.toString());
 
     await Notification.insertMany(
@@ -72,7 +76,12 @@ export async function GET(req: Request) {
       .lean();
 
     for (const m of meetings as any[]) {
-      const when = new Date(m.scheduledAt).toLocaleString();
+     // Meeting reminder message
+const when = new Date(m.scheduledAt).toLocaleString("en-US", {
+  timeZone: "Asia/Dhaka",
+  dateStyle: "medium",
+  timeStyle: "short"
+});
       const message = `"${m.title}" (${m.project?.name}) is happening ${stage.label} — ${when}.`;
       const attendeeIds = m.attendees.map((a: any) => a._id.toString());
       // The admin who scheduled it gets reminded too, alongside every attendee.
