@@ -104,5 +104,11 @@ export default function AdminOverview() {
   );
 }
 
-
+function StatCard({ label, value, accent }: { label: string; value: number; accent: string }) {
+  return (
+    <div className="bg-panel border border-line rounded-xl2 p-5">
+      <div className={`font-display text-3xl font-mono-num ${accent}`}>{value}</div>
+      <div className="text-mute text-xs mt-1 font-mono uppercase tracking-wide">{label}</div>
+    </div>
+  );
 }
