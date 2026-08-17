@@ -5,14 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, Loader2, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import clsx from "clsx";
+import DatePicker from "react-datepicker";
 import MemberPicker from "@/components/MemberPicker";
-
-function toLocalInput(dateStr?: string) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 export default function TaskFormModal({
   open,
@@ -31,7 +25,15 @@ export default function TaskFormModal({
   const [mode, setMode] = useState<"individuals" | "group">("individuals");
   const [selected, setSelected] = useState<string[]>([]);
   const [groupId, setGroupId] = useState("");
-  const [form, setForm] = useState({ title: "", description: "", deadline: "", priority: "medium", figmaLink: "" });
+  // deadline is now a real Date object (or null), not a text string —
+  // this is what lets us drop the naive-string timezone problem entirely.
+  const [form, setForm] = useState<{
+    title: string;
+    description: string;
+    deadline: Date | null;
+    priority: string;
+    figmaLink: string;
+  }>({ title: "", description: "", deadline: null, priority: "medium", figmaLink: "" });
   const [existingAttachments, setExistingAttachments] = useState<any[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -42,7 +44,11 @@ export default function TaskFormModal({
       setForm({
         title: task.title || "",
         description: task.description || "",
-        deadline: toLocalInput(task.deadline),
+        // task.deadline is a stored UTC ISO string — new Date(...) parses
+        // it into an absolute instant, which the browser then always
+        // displays/edits in the viewer's own local time. No manual
+        // timezone math needed on this end.
+        deadline: task.deadline ? new Date(task.deadline) : null,
         priority: task.priority || "medium",
         figmaLink: task.figmaLink || ""
       });
@@ -57,7 +63,7 @@ export default function TaskFormModal({
       }
       setSelected((task.assignees || []).map((a: any) => a._id || a));
     } else {
-      setForm({ title: "", description: "", deadline: "", priority: "medium", figmaLink: "" });
+      setForm({ title: "", description: "", deadline: null, priority: "medium", figmaLink: "" });
       setExistingAttachments([]);
       setNewFiles([]);
       setSelected([]);
@@ -72,6 +78,11 @@ export default function TaskFormModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!form.deadline) {
+      toast.error("Pick a deadline.");
+      return;
+    }
 
     let assignees: string[] = [];
     let groupName = "";
@@ -102,7 +113,19 @@ export default function TaskFormModal({
       }
       const attachments = [...existingAttachments, ...uploaded];
 
-      const payload = { ...form, project: project?._id, assignees, groupName, attachments };
+      // form.deadline is a real Date, produced by react-datepicker from
+      // the user's clicks — it's already anchored to the browser's local
+      // timezone internally. .toISOString() turns it into an unambiguous
+      // UTC instant before it leaves the client, so the server (running
+      // in UTC) never has to guess an offset.
+      const payload = {
+        ...form,
+        deadline: form.deadline.toISOString(),
+        project: project?._id,
+        assignees,
+        groupName,
+        attachments
+      };
       const url = isEdit ? `/api/tasks/${task._id}` : "/api/tasks";
       const res = await fetch(url, {
         method: isEdit ? "PATCH" : "POST",
@@ -207,12 +230,21 @@ export default function TaskFormModal({
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-xs font-mono uppercase tracking-wide text-mute mb-2">Deadline</label>
-                <input
-                  required
-                  type="datetime-local"
-                  value={form.deadline}
-                  onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-                  className="w-full bg-ink border border-line rounded-lg px-3 py-2.5 text-paper text-sm focus-ring outline-none"
+                <DatePicker
+                  selected={form.deadline}
+                  onChange={(date) => setForm({ ...form, deadline: date })}
+                  showTimeSelect
+                  timeIntervals={5}
+                  dateFormat="MMM d, yyyy h:mm aa"
+                  placeholderText="Select date & time"
+                  calendarClassName="meeting-datepicker"
+                  popperClassName="meeting-datepicker-popper"
+                  // readOnly on the input blocks the keyboard entirely —
+                  // the only way to set a value is by clicking a day/time
+                  // in the popup calendar.
+                  customInput={
+                    <input readOnly className="deadline-input-trigger" />
+                  }
                 />
               </div>
               <div>

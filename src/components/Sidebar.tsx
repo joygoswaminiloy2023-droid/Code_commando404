@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import {
-  LayoutGrid, Users, User, FolderKanban, LogOut, X,
-  MessageCircle, StickyNote, Sparkles, Video
-} from "lucide-react";
+
 import { motion } from "framer-motion";
 import clsx from "clsx";
+
+import {
+  LayoutGrid, Users, User, FolderKanban, LogOut, X,
+  MessageCircle, StickyNote, Sparkles, Video, CalendarDays
+} from "lucide-react";
 
 export default function Sidebar({
   role,
@@ -23,6 +25,7 @@ export default function Sidebar({
 
   const adminLinks = [
     { href: "/dashboard/admin", label: "Overview", icon: LayoutGrid },
+     { href: "/dashboard/calendar", label: "Calendar", icon: CalendarDays },
     { href: "/dashboard/admin/projects", label: "Projects", icon: FolderKanban },
     { href: "/dashboard/admin/users", label: "Team", icon: Users },
     { href: "/dashboard/admin/messages", label: "Messages", icon: MessageCircle },
@@ -33,12 +36,14 @@ export default function Sidebar({
   ];
   const memberLinks = [
     { href: "/dashboard/user", label: "My projects", icon: FolderKanban },
+      { href: "/dashboard/calendar", label: "Calendar", icon: CalendarDays },
     { href: "/dashboard/messages", label: "Message admin", icon: MessageCircle },
     { href: "/dashboard/showcase", label: "Showcase", icon: Sparkles },
     { href: "/dashboard/meeting-room", label: "Meeting room", icon: Video },
     { href: "/dashboard/notes", label: "Notes", icon: StickyNote },
     { href: "/dashboard/profile", label: "Profile", icon: User }
   ];
+
 
   const links = role === "admin" ? adminLinks : memberLinks;
   const topLevel = ["/dashboard/admin", "/dashboard/user"];

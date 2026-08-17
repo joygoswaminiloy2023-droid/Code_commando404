@@ -5,12 +5,10 @@ import Meeting from "@/models/Meeting";
 import User from "@/models/User";
 import Notification from "@/models/Notification";
 import { sendPushToUsers } from "@/lib/push";
+import { sendWeeklyDigestEmail } from "@/lib/email";
 import { waitUntil } from "@vercel/functions";
 
-// Runs once a week (wire this to cron-job.org, e.g. Monday 8:00 AM Asia/Dhaka,
-// crontab: 0 8 * * 1). For every member, summarizes: tasks overdue, tasks due
-// this week, and meetings this week — delivered as one push notification +
-// one in-app Notification per person, instead of a wall of individual pings.
+
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -20,10 +18,12 @@ export async function GET(req: Request) {
   await connectDB();
   const now = new Date();
   const in7d = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const appUrl = process.env.NEXTAUTH_URL || "https://your-app.vercel.app";
 
-  const users = await User.find({ role: "member" }).select("_id name").lean();
+ const users = await User.find({}).select("_id name email role").lean();
 
   let digestsSent = 0;
+  let emailsSent = 0;
 
   for (const u of users as any[]) {
     const userId = u._id.toString();
@@ -57,9 +57,23 @@ export async function GET(req: Request) {
     const message = `Weekly digest: ${parts.join(", ")}.`;
 
     await Notification.create({ recipient: userId, message, type: "deadline" });
+
     waitUntil(sendPushToUsers([userId], { title: "Your weekly digest", body: message, url: "/dashboard/calendar" }));
+
+    waitUntil(
+      sendWeeklyDigestEmail({
+        to: u.email,
+        name: u.name,
+        overdue: overdue.map((t: any) => ({ title: t.title, date: t.deadline })),
+        dueThisWeek: dueThisWeek.map((t: any) => ({ title: t.title, date: t.deadline })),
+        meetingsThisWeek: meetingsThisWeek.map((m: any) => ({ title: m.title, date: m.scheduledAt })),
+        appUrl: `${appUrl}/dashboard/calendar`
+      })
+    );
+
     digestsSent++;
+    emailsSent++;
   }
 
-  return NextResponse.json({ ok: true, digestsSent });
+  return NextResponse.json({ ok: true, digestsSent, emailsSent });
 }

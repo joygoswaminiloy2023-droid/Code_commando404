@@ -8,6 +8,10 @@ import Activity from "@/models/Activity";
 import Project from "@/models/Project";
 import { sendPushToUsers } from "@/lib/push";
 import { waitUntil } from "@vercel/functions";
+import { formatInTimeZone } from "date-fns-tz";
+
+
+const APP_TIMEZONE = "Asia/Dhaka";
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -49,6 +53,9 @@ export async function POST(req: Request) {
   const proj: any = await Project.findById(project).lean();
   if (!proj) return NextResponse.json({ error: "Project not found." }, { status: 404 });
 
+  // `deadline` arrives as a proper UTC ISO string (client converts the
+  // naive local input with new Date(...).toISOString() before sending),
+  // so Mongoose stores it as-is with no re-interpretation needed here.
   const task = await Task.create({
     title,
     description,
@@ -69,7 +76,13 @@ export async function POST(req: Request) {
   ]);
 
   const label = groupName ? `the "${groupName}" group` : "you";
-  const message = `New task "${title}" assigned to ${label} in ${proj.name}, due ${new Date(deadline).toLocaleDateString()}.`;
+
+  // Format the deadline explicitly in the app's timezone rather than
+  // relying on toLocaleDateString()'s default, which would use the
+  // SERVER's timezone (UTC on Vercel) and could show the wrong date
+  // for deadlines near midnight in Asia/Dhaka.
+  const deadlineLabel = formatInTimeZone(new Date(deadline), APP_TIMEZONE, "MMM d, yyyy");
+  const message = `New task "${title}" assigned to ${label} in ${proj.name}, due ${deadlineLabel}.`;
 
   await Notification.insertMany(
     assignees.map((a: string) => ({ recipient: a, message, type: "assigned", taskId: task._id }))

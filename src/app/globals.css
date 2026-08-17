@@ -87,3 +87,82 @@ body {
     linear-gradient(90deg, rgba(242,243,245,0.05) 1px, transparent 1px);
   background-size: 44px 44px;
 }
+
+
+
+::selection {
+  background: rgba(232, 52, 43, 0.28);
+}
+
+.meeting-datepicker.react-datepicker {
+  background-color: #14161a; /* match your --panel */
+  border: 1px solid #262a30; /* match your --line */
+  font-family: inherit;
+  color: #f2f2f0; /* match your --paper */
+}
+.meeting-datepicker .react-datepicker__header {
+  background-color: #1a1d22;
+  border-bottom: 1px solid #262a30;
+}
+.meeting-datepicker .react-datepicker__current-month,
+.meeting-datepicker .react-datepicker-time__header,
+.meeting-datepicker .react-datepicker__day-name {
+  color: #f2f2f0;
+}
+.meeting-datepicker .react-datepicker__day {
+  color: #cfd3d8;
+}
+.meeting-datepicker .react-datepicker__day:hover {
+  background-color: #262a30;
+}
+.meeting-datepicker .react-datepicker__day--selected,
+.meeting-datepicker .react-datepicker__day--keyboard-selected {
+  background-color: #e8342b; /* your --signal */
+  color: #ffffff;
+}
+.meeting-datepicker .react-datepicker__day--disabled {
+  color: #4a4f57;
+}
+.meeting-datepicker .react-datepicker__navigation-icon::before {
+  border-color: #cfd3d8;
+}
+.meeting-datepicker .react-datepicker__time-container,
+.meeting-datepicker .react-datepicker__time-box,
+.meeting-datepicker .react-datepicker__time-list {
+  background-color: #14161a;
+}
+.meeting-datepicker .react-datepicker__time-list-item {
+  color: #cfd3d8;
+}
+.meeting-datepicker .react-datepicker__time-list-item:hover {
+  background-color: #262a30 !important;
+}
+.meeting-datepicker .react-datepicker__time-list-item--selected {
+  background-color: #e8342b !important;
+  color: #ffffff !important;
+}
+.meeting-datepicker .react-datepicker__triangle {
+  display: none;
+}
+
+/* Trigger input that opens the picker — styled to match your other
+   form fields (bg-ink / border-line / text-paper). Typing is disabled
+   via readOnly, so this is the only place a user can click into. */
+.deadline-input-trigger {
+  width: 100%;
+  background-color: #0c0d10; /* match your --ink */
+  border: 1px solid #262a30; /* match your --line */
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  color: #f2f2f0; /* match your --paper */
+  font-size: 0.875rem;
+  cursor: pointer;
+  caret-color: transparent;
+}
+.deadline-input-trigger:focus {
+  outline: none;
+  border-color: #e8342b;
+}
+.deadline-input-trigger::placeholder {
+  color: #6b7280;
+}
