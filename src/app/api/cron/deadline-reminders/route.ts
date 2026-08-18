@@ -17,11 +17,6 @@ const APP_TIMEZONE = "Asia/Dhaka";
 void User;
 void Project;
 
-// Runs the reminder sweep: task deadlines AND meeting reminders, each in
-// three stages (48h / 24h / 1h out). Safe to call as often as you like —
-// every check is driven by a "sent" flag on the record, not by timing, so
-// calling this on a schedule (e.g. every 15 min via an external scheduler
-// like cron-job.org) reliably catches all three windows.
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -37,7 +32,6 @@ export async function GET(req: Request) {
     { hours: 1, field: "remind1hSent", label: "about 1 hour" }
   ];
 
-  // --- Task deadlines: 48h / 24h / 1h before ---
   let tasksNotified = 0;
   for (const stage of stages) {
     const windowEnd = new Date(now.getTime() + stage.hours * 60 * 60 * 1000);
@@ -63,7 +57,6 @@ export async function GET(req: Request) {
     }
   }
 
-  // --- Meeting reminders: 48h / 24h / 1h before ---
   let meetingsNotified = 0;
   for (const stage of stages) {
     const windowEnd = new Date(now.getTime() + stage.hours * 60 * 60 * 1000);
@@ -79,7 +72,6 @@ export async function GET(req: Request) {
       const when = formatInTimeZone(new Date(m.scheduledAt), APP_TIMEZONE, "MMM d, yyyy, h:mm a");
       const message = `"${m.title}" (${m.project?.name}) is happening in ${stage.label} — ${when}.`;
       const attendeeIds = m.attendees.map((a: any) => a._id.toString());
-      // The admin who scheduled it gets reminded too, alongside every attendee.
       const recipients = Array.from(new Set([...attendeeIds, m.scheduledBy.toString()]));
 
       await Notification.insertMany(

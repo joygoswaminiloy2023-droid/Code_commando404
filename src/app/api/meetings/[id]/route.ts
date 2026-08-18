@@ -5,6 +5,8 @@ import { connectDB } from "@/lib/db";
 import Meeting from "@/models/Meeting";
 import Project from "@/models/Project";
 
+const BUFFER_HOURS = 0.25;
+
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -37,19 +39,29 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json(populatedNotes);
   }
 
+  // Compare actual timestamps, not stringified values — body.scheduledAt
+  // arrives as an ISO string while meeting.scheduledAt is a Date object,
+  // so String(...) on each side never reliably matches.
+  const previousScheduledAtMs = meeting.scheduledAt.getTime();
+
   const allowed = ["title", "topic", "scheduledAt", "attendees", "notes"];
-  let rescheduled = false;
   for (const key of allowed) {
-    if (body[key] !== undefined) {
-      if (key === "scheduledAt" && String(body[key]) !== String(meeting.scheduledAt)) rescheduled = true;
-      meeting[key] = body[key];
-    }
+    if (body[key] !== undefined) meeting[key] = body[key];
   }
+
+  const rescheduled = body.scheduledAt !== undefined && meeting.scheduledAt.getTime() !== previousScheduledAtMs;
+
   if (rescheduled) {
-    meeting.remind48hSent = false;
-    meeting.remind24hSent = false;
-    meeting.remind1hSent = false;
+    // Recompute from actual lead time, same buffered logic used at
+    // creation — a blanket reset to false would wrongly un-skip stages
+    // that don't apply anymore (e.g. resetting the 48h flag on a meeting
+    // that got moved to 30 minutes away would fire a bogus "2 days" ping).
+    const leadTimeHours = (meeting.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
+    meeting.remind48hSent = leadTimeHours < 48 - BUFFER_HOURS;
+    meeting.remind24hSent = leadTimeHours < 24 - BUFFER_HOURS;
+    meeting.remind1hSent = leadTimeHours < 1 - BUFFER_HOURS;
   }
+
   await meeting.save();
 
   const populated = await meeting.populate([

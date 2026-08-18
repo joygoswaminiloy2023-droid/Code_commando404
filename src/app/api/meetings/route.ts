@@ -8,6 +8,8 @@ import Notification from "@/models/Notification";
 import { sendPushToUsers } from "@/lib/push";
 import { waitUntil } from "@vercel/functions";
 
+const BUFFER_HOURS = 0.25;
+
 // GET /api/meetings              → every upcoming meeting across projects the user's in (admin: all)
 // GET /api/meetings?project=<id> → every meeting for one project (any project member can see these)
 export async function GET(req: Request) {
@@ -59,8 +61,8 @@ export async function POST(req: Request) {
   // If the meeting is scheduled with less lead time than a reminder stage's
   // window represents, that stage would never be a meaningful heads-up —
   // e.g. a meeting booked 1 hour out shouldn't trigger a "2 days away!"
-  // reminder. Pre-mark those stages as already sent so the cron sweep
-  // skips them and only the stages that make sense actually fire.
+  // reminder. A small buffer keeps a meeting booked basically AT a stage
+  // boundary from being incorrectly skipped due to form-filling delay.
   const leadTimeHours = (new Date(scheduledAt).getTime() - Date.now()) / (1000 * 60 * 60);
 
   const meeting = await Meeting.create({
@@ -70,9 +72,9 @@ export async function POST(req: Request) {
     scheduledAt,
     scheduledBy: (session.user as any).id,
     attendees,
-    remind48hSent: leadTimeHours < 48,
-    remind24hSent: leadTimeHours < 24,
-    remind1hSent: leadTimeHours < 1
+    remind48hSent: leadTimeHours < 48 - BUFFER_HOURS,
+    remind24hSent: leadTimeHours < 24 - BUFFER_HOURS,
+    remind1hSent: leadTimeHours < 1 - BUFFER_HOURS
   });
   const populated = await meeting.populate([
     { path: "project", select: "name color" },
