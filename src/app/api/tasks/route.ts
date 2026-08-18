@@ -10,7 +10,6 @@ import { sendPushToUsers } from "@/lib/push";
 import { waitUntil } from "@vercel/functions";
 import { formatInTimeZone } from "date-fns-tz";
 
-
 const APP_TIMEZONE = "Asia/Dhaka";
 
 export async function GET(req: Request) {
@@ -53,9 +52,12 @@ export async function POST(req: Request) {
   const proj: any = await Project.findById(project).lean();
   if (!proj) return NextResponse.json({ error: "Project not found." }, { status: 404 });
 
-  // `deadline` arrives as a proper UTC ISO string (client converts the
-  // naive local input with new Date(...).toISOString() before sending),
-  // so Mongoose stores it as-is with no re-interpretation needed here.
+  // If a deadline is closer than a stage's window represents, that stage
+  // was never a meaningful heads-up — e.g. a task due in 3 hours shouldn't
+  // trigger a "2 days left!" reminder. Pre-mark those stages as sent so the
+  // cron sweep skips straight to whichever stages still make sense.
+  const leadTimeHours = (new Date(deadline).getTime() - Date.now()) / (1000 * 60 * 60);
+
   const task = await Task.create({
     title,
     description,
@@ -66,7 +68,10 @@ export async function POST(req: Request) {
     deadline,
     priority: priority || "medium",
     attachments: attachments || [],
-    figmaLink: figmaLink || ""
+    figmaLink: figmaLink || "",
+    remind48hSent: leadTimeHours < 48,
+    remind24hSent: leadTimeHours < 24,
+    remind1hSent: leadTimeHours < 1
   });
 
   const populated = await task.populate([
@@ -94,7 +99,7 @@ export async function POST(req: Request) {
     assigneeName: groupName || populated.assignees.map((a: any) => a.name).join(", ")
   });
 
-  await waitUntil(sendPushToUsers(assignees, { title: "New task assigned", body: message, url: "/dashboard" }));
+  waitUntil(sendPushToUsers(assignees, { title: "New task assigned", body: message, url: "/dashboard" }));
 
   return NextResponse.json(populated, { status: 201 });
 }

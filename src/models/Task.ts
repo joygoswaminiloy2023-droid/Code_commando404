@@ -27,9 +27,12 @@ const TaskSchema = new Schema(
     figmaLink: { type: String, default: "" },
     completedAt: { type: Date, default: null },
     completedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    // Set once a deadline-approaching push/notification has gone out, so the
-    // daily reminder cron never nags the same task twice.
-    reminderSent: { type: Boolean, default: false }
+    // Staged deadline reminders — same pattern as Meeting's remind*Sent
+    // flags. Each fires once as its window is entered, driven by a flag
+    // rather than by timing, so the cron sweep can run as often as needed.
+    remind48hSent: { type: Boolean, default: false },
+    remind24hSent: { type: Boolean, default: false },
+    remind1hSent: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

@@ -2,68 +2,68 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Task from "@/models/Task";
 import Meeting from "@/models/Meeting";
-import User from "@/models/User";        
-import Project from "@/models/Project"; 
+import User from "@/models/User";
+import Project from "@/models/Project";
 import Notification from "@/models/Notification";
-import mongoose from "mongoose"; 
 import { sendPushToUsers } from "@/lib/push";
 import { waitUntil } from "@vercel/functions";
+import { formatInTimeZone } from "date-fns-tz";
 
-// Runs the reminder sweep: task deadlines (one stage, ~48h out) and meeting
-// reminders (three stages: 48h / 24h / 1h out). Safe to call as often as
-// you like — every check is driven by a "sent" flag on the record, not by
-// timing, so calling this daily (Vercel's free-tier cron limit) reliably
-// catches the 48h/24h windows, but the 1h-before meeting reminder only
-// fires on time if something pings this endpoint every ~15 minutes — see
-// the deployment notes for wiring up a free external scheduler for that.
+const APP_TIMEZONE = "Asia/Dhaka";
+
+// Kept as no-op references so the bundler doesn't tree-shake these imports
+// away — Task/Meeting .populate() needs both schemas registered even though
+// neither is called directly by name in this file.
+void User;
+void Project;
+
+// Runs the reminder sweep: task deadlines AND meeting reminders, each in
+// three stages (48h / 24h / 1h out). Safe to call as often as you like —
+// every check is driven by a "sent" flag on the record, not by timing, so
+// calling this on a schedule (e.g. every 15 min via an external scheduler
+// like cron-job.org) reliably catches all three windows.
 export async function GET(req: Request) {
   const authHeader = req.headers.get("authorization");
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-   console.log("Registered models:", Object.keys(mongoose.models));
-
-      void User;
-   void Project;
-
   await connectDB();
   const now = new Date();
-  const in48h = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-  // --- Task deadlines ---
-  const tasks = await Task.find({
-    status: "pending",
-    reminderSent: { $ne: true },
-    deadline: { $gt: now, $lte: in48h }
-  })
-    .populate("assignees", "name")
-    .lean();
+  const stages: { hours: number; field: "remind48hSent" | "remind24hSent" | "remind1hSent"; label: string }[] = [
+    { hours: 48, field: "remind48hSent", label: "about 2 days" },
+    { hours: 24, field: "remind24hSent", label: "about 1 day" },
+    { hours: 1, field: "remind1hSent", label: "about 1 hour" }
+  ];
 
+  // --- Task deadlines: 48h / 24h / 1h before ---
   let tasksNotified = 0;
-  for (const t of tasks as any[]) {
-const message = `"${t.title}" is due ${new Date(t.deadline).toLocaleString("en-US", {
-  timeZone: "Asia/Dhaka",
-  dateStyle: "medium",
-  timeStyle: "short"
-})} — about 2 days left.`;
-    const assigneeIds = t.assignees.map((a: any) => a._id.toString());
+  for (const stage of stages) {
+    const windowEnd = new Date(now.getTime() + stage.hours * 60 * 60 * 1000);
+    const tasks = await Task.find({
+      status: "pending",
+      [stage.field]: { $ne: true },
+      deadline: { $gt: now, $lte: windowEnd }
+    })
+      .populate("assignees", "name")
+      .lean();
 
-    await Notification.insertMany(
-      assigneeIds.map((id: string) => ({ recipient: id, message, type: "deadline", taskId: t._id }))
-    );
-    await waitUntil(sendPushToUsers(assigneeIds, { title: "Deadline approaching", body: message, url: "/dashboard" }));
-    await Task.findByIdAndUpdate(t._id, { reminderSent: true });
-    tasksNotified++;
+    for (const t of tasks as any[]) {
+      const deadlineLabel = formatInTimeZone(new Date(t.deadline), APP_TIMEZONE, "MMM d, yyyy, h:mm a");
+      const message = `"${t.title}" is due ${deadlineLabel} — ${stage.label} left.`;
+      const assigneeIds = t.assignees.map((a: any) => a._id.toString());
+
+      await Notification.insertMany(
+        assigneeIds.map((id: string) => ({ recipient: id, message, type: "deadline", taskId: t._id }))
+      );
+      waitUntil(sendPushToUsers(assigneeIds, { title: "Deadline approaching", body: message, url: "/dashboard" }));
+      await Task.findByIdAndUpdate(t._id, { [stage.field]: true });
+      tasksNotified++;
+    }
   }
 
   // --- Meeting reminders: 48h / 24h / 1h before ---
-  const stages: { hours: number; field: "remind48hSent" | "remind24hSent" | "remind1hSent"; label: string }[] = [
-    { hours: 48, field: "remind48hSent", label: "in about 2 days" },
-    { hours: 24, field: "remind24hSent", label: "in about 1 day" },
-    { hours: 1, field: "remind1hSent", label: "in about 1 hour" }
-  ];
-
   let meetingsNotified = 0;
   for (const stage of stages) {
     const windowEnd = new Date(now.getTime() + stage.hours * 60 * 60 * 1000);
@@ -76,13 +76,8 @@ const message = `"${t.title}" is due ${new Date(t.deadline).toLocaleString("en-U
       .lean();
 
     for (const m of meetings as any[]) {
-     // Meeting reminder message
-const when = new Date(m.scheduledAt).toLocaleString("en-US", {
-  timeZone: "Asia/Dhaka",
-  dateStyle: "medium",
-  timeStyle: "short"
-});
-      const message = `"${m.title}" (${m.project?.name}) is happening ${stage.label} — ${when}.`;
+      const when = formatInTimeZone(new Date(m.scheduledAt), APP_TIMEZONE, "MMM d, yyyy, h:mm a");
+      const message = `"${m.title}" (${m.project?.name}) is happening in ${stage.label} — ${when}.`;
       const attendeeIds = m.attendees.map((a: any) => a._id.toString());
       // The admin who scheduled it gets reminded too, alongside every attendee.
       const recipients = Array.from(new Set([...attendeeIds, m.scheduledBy.toString()]));
@@ -90,7 +85,7 @@ const when = new Date(m.scheduledAt).toLocaleString("en-US", {
       await Notification.insertMany(
         recipients.map((id: string) => ({ recipient: id, message, type: "meeting" }))
       );
-      await waitUntil(sendPushToUsers(recipients, { title: "Meeting reminder", body: message, url: "/dashboard" }));
+      waitUntil(sendPushToUsers(recipients, { title: "Meeting reminder", body: message, url: "/dashboard" }));
       await Meeting.findByIdAndUpdate(m._id, { [stage.field]: true });
       meetingsNotified++;
     }
