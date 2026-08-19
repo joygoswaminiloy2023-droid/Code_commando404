@@ -61,14 +61,22 @@ export default function MeetingFormModal({
           attendees: selected
         })
       });
-      const data = await res.json();
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Response wasn't JSON (e.g. a server error page) — fall through
+        // to the generic error message below instead of crashing silently.
+      }
       if (!res.ok) {
-        toast.error(data.error || "Could not save the meeting.");
+        toast.error(data?.error || "Could not save the meeting. Please try again.");
         return;
       }
       toast.success(isEdit ? "Meeting updated." : "Meeting scheduled — attendees notified.");
       onSaved();
       onClose();
+    } catch {
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -117,7 +125,7 @@ export default function MeetingFormModal({
                 selected={scheduledAt}
                 onChange={(date) => setScheduledAt(date)}
                 showTimeSelect
-                timeIntervals={15}
+                timeIntervals={5}
                 timeFormat="h:mm aa"
                 dateFormat="MMM d, yyyy — h:mm aa"
                 minDate={new Date()}

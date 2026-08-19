@@ -7,6 +7,9 @@ import Notification from "@/models/Notification";
 import Activity from "@/models/Activity";
 import { sendPushToUsers } from "@/lib/push";
 import { waitUntil } from "@vercel/functions";
+import { formatInTimeZone } from "date-fns-tz";
+
+const APP_TIMEZONE = "Asia/Dhaka";
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -66,6 +69,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   // Admin: full edit, including reassignment / files / deadline / priority.
   const allowed = ["title", "description", "assignees", "groupName", "deadline", "priority", "attachments", "figmaLink", "status"];
+  const oldTitle = task.title;
+  const oldDeadline = task.deadline;
+  const oldAssigneeIds = task.assignees.map((a: any) => a.toString()).sort();
   const deadlineChanged = body.deadline !== undefined &&
     new Date(body.deadline).getTime() !== new Date(task.deadline).getTime();
   for (const key of allowed) {
@@ -98,14 +104,34 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     { path: "completedBy", select: "name avatarColor avatarUrl" }
   ]);
 
-  if (body.assignees) {
-    const message = `Task "${task.title}" was updated by an admin.`;
+  // Tell assignees exactly what changed — renamed, deadline moved,
+  // reassigned — instead of a generic "task updated" ping.
+  const titleChanged = body.title !== undefined && body.title !== oldTitle;
+  const assigneesChanged = body.assignees !== undefined &&
+    JSON.stringify([...assigneeIds].sort()) !== JSON.stringify(oldAssigneeIds);
+
+  const changes: string[] = [];
+  if (titleChanged) changes.push(`renamed to "${task.title}"`);
+  if (deadlineChanged) {
+    const oldLabel = formatInTimeZone(new Date(oldDeadline), APP_TIMEZONE, "MMM d, h:mm a");
+    const newLabel = formatInTimeZone(new Date(task.deadline), APP_TIMEZONE, "MMM d, yyyy, h:mm a");
+    changes.push(`deadline moved from ${oldLabel} to ${newLabel}`);
+  }
+  if (assigneesChanged) {
+    changes.push(`reassigned to ${task.groupName || populated.assignees.map((a: any) => a.name).join(", ")}`);
+  }
+
+  if (changes.length > 0) {
+    const message = `Task "${task.title}" updated — ${changes.join("; ")}.`;
+    await Notification.insertMany(
+      assigneeIds.map((id: string) => ({ recipient: id, message, type: "assigned", taskId: task._id }))
+    );
     await Activity.create({
       kind: "assigned",
       taskTitle: task.title,
       assigneeName: task.groupName || populated.assignees.map((a: any) => a.name).join(", ")
     });
-    sendPushToUsers(assigneeIds, { title: "Task updated", body: message, url: "/dashboard" });
+    waitUntil(sendPushToUsers(assigneeIds, { title: "Task updated", body: message, url: "/dashboard" }));
   }
 
   return NextResponse.json(populated);
