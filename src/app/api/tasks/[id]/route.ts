@@ -8,8 +8,6 @@ import Activity from "@/models/Activity";
 import { sendPushToUsers } from "@/lib/push";
 import { waitUntil } from "@vercel/functions";
 
-const BUFFER_HOURS = 0.25;
-
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -57,7 +55,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     await Activity.create({ kind: "completed", taskTitle: task.title, assigneeName: user.name });
 
-    waitUntil(sendPushToUsers([assignedById], {
+    await waitUntil(sendPushToUsers([assignedById], {
       title: "Task completed",
       body: message,
       url: "/dashboard/admin/projects/" + projectId
@@ -67,11 +65,19 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   // Admin: full edit, including reassignment / files / deadline / priority.
-  const previousDeadlineMs = task.deadline.getTime();
-
   const allowed = ["title", "description", "assignees", "groupName", "deadline", "priority", "attachments", "figmaLink", "status"];
+  const deadlineChanged = body.deadline !== undefined &&
+    new Date(body.deadline).getTime() !== new Date(task.deadline).getTime();
   for (const key of allowed) {
     if (body[key] !== undefined) task[key] = body[key];
+  }
+  // If the deadline actually moved, clear the reminder flags so the new
+  // date gets its own fresh 48h/24h/1h reminders instead of staying silent
+  // because the old deadline already "used up" that stage.
+  if (deadlineChanged) {
+    task.remind48hSent = false;
+    task.remind24hSent = false;
+    task.remind1hSent = false;
   }
   if (body.status === "completed" && !task.completedAt) {
     task.completedAt = new Date();
@@ -81,18 +87,6 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     task.completedAt = null;
     task.completedBy = null;
   }
-
-  // If the deadline actually changed, recompute the staged reminder flags
-  // from scratch — otherwise a stage marked "sent" under the old deadline
-  // stays stuck skipped forever, even if the new deadline puts it back
-  // inside (or outside) that stage's window.
-  if (body.deadline !== undefined && task.deadline.getTime() !== previousDeadlineMs) {
-    const leadTimeHours = (task.deadline.getTime() - Date.now()) / (1000 * 60 * 60);
-    task.remind48hSent = leadTimeHours < 48 - BUFFER_HOURS;
-    task.remind24hSent = leadTimeHours < 24 - BUFFER_HOURS;
-    task.remind1hSent = leadTimeHours < 1 - BUFFER_HOURS;
-  }
-
   await task.save();
 
   const assigneeIds = task.assignees.map((a: any) => a.toString());
@@ -111,7 +105,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       taskTitle: task.title,
       assigneeName: task.groupName || populated.assignees.map((a: any) => a.name).join(", ")
     });
-    waitUntil(sendPushToUsers(assigneeIds, { title: "Task updated", body: message, url: "/dashboard" }));
+    sendPushToUsers(assigneeIds, { title: "Task updated", body: message, url: "/dashboard" });
   }
 
   return NextResponse.json(populated);
